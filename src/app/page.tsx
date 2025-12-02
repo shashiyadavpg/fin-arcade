@@ -1,120 +1,163 @@
-export default function Home() {
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { UserProgress } from '@/types/user';
+import { initializeProgress } from '@/lib/gamification';
+import { XPDisplay } from '@/components/gamification/XPDisplay';
+import { StreakDisplay } from '@/components/gamification/StreakDisplay';
+import { Card } from '@/components/ui/Card';
+import { ProgressBar } from '@/components/ui/ProgressBar';
+import { modules } from '@/data/modules';
+
+export default function Dashboard() {
+  const [progress, setProgress] = useState<UserProgress | null>(null);
+
+  useEffect(() => {
+    const userProgress = initializeProgress();
+    setProgress(userProgress);
+  }, []);
+
+  if (!progress) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-slate-400">Loading...</div>
+      </div>
+    );
+  }
+
+  const completedModules = modules.filter(m => progress.completedModules.includes(m.id));
+  const inProgressModules = modules.filter(m => 
+    !progress.completedModules.includes(m.id) && 
+    (!m.prerequisites || m.prerequisites.every(p => progress.completedModules.includes(p)))
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-50">
-      <main className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-16 md:flex-row md:justify-between md:gap-16">
-        <section className="space-y-8 text-center md:text-left">
-          <p className="inline-flex items-center rounded-full border border-slate-700 bg-slate-900/60 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-slate-300">
-            Fin Arcade
-          </p>
+    <main className="mx-auto min-h-screen max-w-7xl px-6 py-8">
+      <div className="mb-8">
+        <h1 className="mb-2 text-3xl font-bold">Welcome back!</h1>
+        <p className="text-slate-400">Continue your finance learning journey</p>
+      </div>
 
-          <div className="space-y-4">
-            <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
-              Turn finance into a{" "}
-              <span className="bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-400 bg-clip-text text-transparent">
-                game you can win
-              </span>
-              .
-            </h1>
-            <p className="max-w-xl text-base text-slate-300 md:text-lg">
-              Learn money skills by playing bite‑sized challenges. Build habits,
-              level up your financial IQ, and compete with friends on real‑world
-              goals.
+      {/* Stats Overview */}
+      <div className="mb-8 grid gap-4 md:grid-cols-3">
+        <Card>
+          <XPDisplay progress={progress} />
+        </Card>
+        
+        <Card>
+          <StreakDisplay streak={progress.streak} />
+        </Card>
+
+        <Card>
+          <div className="space-y-2">
+            <p className="text-sm text-slate-300">Modules Completed</p>
+            <p className="text-3xl font-bold">
+              {completedModules.length} / {modules.length}
             </p>
+            <ProgressBar
+              value={(completedModules.length / modules.length) * 100}
+              color="cyan"
+              showValue={false}
+            />
           </div>
+        </Card>
+      </div>
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
-            <button className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-7 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-300">
-              Start playing now
-            </button>
-            <button className="inline-flex items-center justify-center rounded-full border border-slate-700 px-7 py-3 text-sm font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-900/60">
-              Watch how it works
-            </button>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 md:justify-start">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Daily XP streaks & quests
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
-              Simulated portfolios
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
-              Peer leaderboards
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-12 w-full max-w-md md:mt-0">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-[0_22px_60px_rgba(15,23,42,0.9)] backdrop-blur">
-            <div className="mb-4 flex items-center justify-between text-xs text-slate-400">
-              <span className="inline-flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Today&apos;s arcade run
-              </span>
-              <span>Level 3 · Money Basics</span>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs text-slate-300">
-                  <span>XP Progress</span>
-                  <span>720 / 1000</span>
+      {/* Quick Actions */}
+      <div className="mb-8">
+        <h2 className="mb-4 text-xl font-semibold">Continue Learning</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {inProgressModules.slice(0, 3).map((module) => (
+            <Link key={module.id} href={`/modules/${module.id}`}>
+              <Card hover glow className="h-full">
+                <div className="mb-3 text-3xl">{module.icon}</div>
+                <h3 className="mb-2 text-lg font-semibold">{module.title}</h3>
+                <p className="mb-4 text-sm text-slate-400">{module.description}</p>
+                <div className="flex items-center justify-between text-xs text-slate-500">
+                  <span>{module.difficulty}</span>
+                  <span>{module.estimatedTime} min</span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-800">
-                  <div className="h-full w-[72%] rounded-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400" />
-                </div>
-              </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
 
-              <div className="grid grid-cols-3 gap-3 text-xs">
-                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-3">
-                  <p className="text-[0.65rem] text-emerald-300">Daily Quest</p>
-                  <p className="mt-1 font-semibold text-slate-50">
-                    Build a 50/30/20 budget
+      {/* All Modules */}
+      <div className="mb-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">All Modules</h2>
+          <Link
+            href="/modules"
+            className="text-sm text-emerald-400 hover:text-emerald-300"
+          >
+            View all →
+          </Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {modules.map((module) => {
+            const isCompleted = progress.completedModules.includes(module.id);
+            const isLocked = module.prerequisites?.some(
+              p => !progress.completedModules.includes(p)
+            );
+
+            return (
+              <Link key={module.id} href={isLocked ? '#' : `/modules/${module.id}`}>
+                <Card hover className={`h-full ${isLocked ? 'opacity-50' : ''}`}>
+                  <div className="mb-3 flex items-start justify-between">
+                    <span className="text-3xl">{module.icon}</span>
+                    {isCompleted && (
+                      <span className="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-400">
+                        ✓ Complete
+                      </span>
+                    )}
+                    {isLocked && (
+                      <span className="rounded-full bg-slate-700 px-2 py-1 text-xs text-slate-400">
+                        🔒 Locked
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="mb-2 text-lg font-semibold">{module.title}</h3>
+                  <p className="mb-4 text-sm text-slate-400 line-clamp-2">
+                    {module.description}
                   </p>
-                  <p className="mt-2 text-[0.65rem] text-slate-300">+250 XP</p>
-                </div>
-                <div className="rounded-2xl border border-sky-500/20 bg-sky-500/10 p-3">
-                  <p className="text-[0.65rem] text-sky-300">Skill Track</p>
-                  <p className="mt-1 font-semibold text-slate-50">
-                    Emergency fund ladder
-                  </p>
-                  <p className="mt-2 text-[0.65rem] text-slate-300">+120 XP</p>
-                </div>
-                <div className="rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/10 p-3">
-                  <p className="text-[0.65rem] text-fuchsia-300">
-                    Challenge
-                  </p>
-                  <p className="mt-1 font-semibold text-slate-50">
-                    Beat your friends&apos; streak
-                  </p>
-                  <p className="mt-2 text-[0.65rem] text-slate-300">+75 XP</p>
-                </div>
-              </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className={`capitalize ${
+                      module.difficulty === 'beginner' ? 'text-emerald-400' :
+                      module.difficulty === 'intermediate' ? 'text-cyan-400' :
+                      'text-sky-400'
+                    }`}>
+                      {module.difficulty}
+                    </span>
+                    <span className="text-slate-500">{module.estimatedTime} min</span>
+                  </div>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
 
-              <div className="mt-2 flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3 text-xs">
-                <div className="space-y-1">
-                  <p className="text-slate-300">Weekly time invested</p>
-                  <p className="text-sm font-semibold text-slate-50">
-                    27 minutes
-                  </p>
-                </div>
-                <div className="text-right text-[0.7rem] text-slate-400">
-                  <p>+3.2× improvement</p>
-                  <p>vs. last week</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <p className="mt-4 text-center text-xs text-slate-500 md:text-left">
-            No real money, no jargon — just interactive runs that make personal
-            finance finally click.
+      {/* Weak Areas */}
+      {progress.weakAreas.length > 0 && (
+        <Card>
+          <h3 className="mb-4 text-lg font-semibold">Recommended Practice</h3>
+          <p className="mb-2 text-sm text-slate-400">
+            Focus on these topics to improve your understanding:
           </p>
-        </section>
-      </main>
-    </div>
+          <div className="flex flex-wrap gap-2">
+            {progress.weakAreas.slice(0, 5).map((area, idx) => (
+              <span
+                key={idx}
+                className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300"
+              >
+                {area}
+              </span>
+            ))}
+          </div>
+        </Card>
+      )}
+    </main>
   );
 }
