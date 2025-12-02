@@ -38,6 +38,14 @@ export const modules: Module[] = [
     estimatedTime: 180,
     lessons: [
       {
+        id: 'financial-statements-intro',
+        title: 'The Financial Story',
+        content: 'Financial statements are the scorecard of business. Learn how the Income Statement, Balance Sheet, and Cash Flow Statement connect.',
+        examples: [],
+        estimatedTime: 15,
+        interactive: true,
+      },
+      {
         id: 'trend-analysis',
         title: 'Trend Analysis',
         content: 'Trend analysis examines financial data over multiple periods to identify patterns, growth rates, and potential issues.',
@@ -50,6 +58,23 @@ export const modules: Module[] = [
           },
         ],
         estimatedTime: 20,
+        interactive: true,
+      },
+      {
+        id: 'vertical-analysis',
+        title: 'Vertical Analysis',
+        content: 'Vertical analysis looks at each line item as a percentage of a base figure (usually Revenue or Total Assets). It reveals cost structure efficiency.',
+        examples: [],
+        estimatedTime: 20,
+        interactive: true,
+      },
+      {
+        id: 'horizontal-analysis',
+        title: 'Horizontal Analysis',
+        content: 'Horizontal analysis compares financial data over time to identify trends and growth patterns. It highlights year-over-year changes.',
+        examples: [],
+        estimatedTime: 20,
+        interactive: true,
       },
       {
         id: 'ratio-analysis',
@@ -64,6 +89,30 @@ export const modules: Module[] = [
           },
         ],
         estimatedTime: 30,
+        interactive: true,
+      },
+      {
+        id: 'dupont-analysis',
+        title: 'DuPont Analysis',
+        content: 'DuPont Analysis breaks down Return on Equity (ROE) into three drivers: Profit Margin, Asset Turnover, and Financial Leverage.',
+        examples: [],
+        estimatedTime: 25,
+        interactive: true,
+      },
+      {
+        id: 'eps-analysis',
+        title: 'Earnings Per Share (EPS)',
+        content: 'Understand the difference between Basic and Diluted EPS. See how stock options and convertible bonds dilute shareholder value.',
+        examples: [],
+        estimatedTime: 20,
+        interactive: true,
+      },
+      {
+        id: 'cash-flow-analysis',
+        title: 'Cash Flow Analysis',
+        content: 'Profit is opinion, cash is fact. Analyze the three pipelines of cash: Operating, Investing, and Financing activities.',
+        examples: [],
+        estimatedTime: 25,
         interactive: true,
       },
     ],
@@ -210,4 +259,3 @@ export const modules: Module[] = [
 export function getModule(id: string): Module | undefined {
   return modules.find(m => m.id === id);
 }
-
