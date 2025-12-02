@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 
@@ -28,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-50 antialiased`}
       >
-        <Navigation />
+        <Suspense fallback={<nav className="border-b border-slate-800 bg-slate-900/50 backdrop-blur h-16" />}>
+          <Navigation />
+        </Suspense>
         {children}
       </body>
     </html>

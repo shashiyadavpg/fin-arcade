@@ -11,7 +11,7 @@ const navItems = [
 ];
 
 export function Navigation() {
-  const pathname = usePathname();
+  const pathname = usePathname() || '/';
 
   return (
     <nav className="border-b border-slate-800 bg-slate-900/50 backdrop-blur">
