@@ -3,7 +3,7 @@
 interface BadgeProps {
   name: string;
   icon?: string;
-  color?: string;
+  color?: 'emerald' | 'cyan' | 'sky' | 'fuchsia';
   earned?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -24,9 +24,8 @@ export function Badge({ name, icon, color = 'emerald', earned = false, size = 'm
 
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-2xl border-2 p-3 transition-all ${
-        earned ? 'opacity-100 scale-100' : 'opacity-50 scale-95'
-      } ${sizeClasses[size]} ${colorClasses[color]}`}
+      className={`flex flex-col items-center justify-center rounded-2xl border-2 p-3 transition-all ${earned ? 'opacity-100 scale-100' : 'opacity-50 scale-95'
+        } ${sizeClasses[size]} ${colorClasses[color]}`}
       title={name}
     >
       {icon && <span className="text-2xl mb-1">{icon}</span>}
