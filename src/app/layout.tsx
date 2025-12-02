@@ -47,6 +47,11 @@ export default function RootLayout({
 
           <GamificationOverlay />
           <SoundToggle />
+
+          {/* Version Indicator - Temporary for Debugging */}
+          <div className="fixed bottom-2 right-2 z-50 rounded bg-slate-900/80 px-2 py-1 text-[10px] text-slate-500 backdrop-blur">
+            v8.5.1 - FSA Update
+          </div>
         </SoundProvider>
       </body>
     </html>
