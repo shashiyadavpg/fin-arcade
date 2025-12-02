@@ -1,146 +1,194 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/Card';
+import { motion } from 'framer-motion';
+
+type OptionType = 'call' | 'put';
+type Position = 'long' | 'short';
 
 export function OptionPayoff() {
-  const [optionType, setOptionType] = useState<'call' | 'put'>('call');
-  const [strike, setStrike] = useState(100);
+  const [spotPrice, setSpotPrice] = useState(100);
+  const [strikePrice, setStrikePrice] = useState(100);
   const [premium, setPremium] = useState(5);
-  const [currentPrice, setCurrentPrice] = useState(100);
+  const [optionType, setOptionType] = useState<OptionType>('call');
+  const [position, setPosition] = useState<Position>('long');
 
-  const calculatePayoff = (stockPrice: number): number => {
+  const calculateProfit = (price: number) => {
+    let intrinsicValue = 0;
     if (optionType === 'call') {
-      return Math.max(0, stockPrice - strike) - premium;
+      intrinsicValue = Math.max(0, price - strikePrice);
     } else {
-      return Math.max(0, strike - stockPrice) - premium;
+      intrinsicValue = Math.max(0, strikePrice - price);
+    }
+
+    if (position === 'long') {
+      return intrinsicValue - premium;
+    } else {
+      return premium - intrinsicValue;
     }
   };
 
-  const prices = Array.from({ length: 201 }, (_, i) => i);
-  const payoffs = prices.map(p => calculatePayoff(p));
+  const payoffData = useMemo(() => {
+    const points = [];
+    const range = 50;
+    const start = Math.max(0, strikePrice - range);
+    const end = strikePrice + range;
+
+    for (let p = start; p <= end; p += 2) {
+      points.push({ price: p, profit: calculateProfit(p) });
+    }
+    return points;
+  }, [strikePrice, premium, optionType, position]);
+
+  const currentProfit = calculateProfit(spotPrice);
+  const maxProfit = Math.max(...payoffData.map(p => Math.abs(p.profit)));
 
   return (
-    <Card>
-      <h3 className="mb-4 text-lg font-semibold">Option Payoff Calculator</h3>
-      
-      <div className="mb-6 space-y-4">
-        <div>
-          <label className="mb-2 block text-sm text-slate-300">Option Type</label>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setOptionType('call')}
-              className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                optionType === 'call'
-                  ? 'bg-emerald-500 text-slate-950'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-              }`}
-            >
-              Call Option
-            </button>
-            <button
-              onClick={() => setOptionType('put')}
-              className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                optionType === 'put'
-                  ? 'bg-fuchsia-500 text-slate-950'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-              }`}
-            >
-              Put Option
-            </button>
-          </div>
-        </div>
+    <Card className="overflow-hidden border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+      <div className="p-6">
+        <h3 className="mb-6 text-xl font-bold text-slate-100">Option Strategy Visualizer</h3>
 
-        <div>
-          <label className="mb-2 block text-sm text-slate-300">
-            Strike Price: ${strike}
-          </label>
-          <input
-            type="range"
-            min="50"
-            max="150"
-            value={strike}
-            onChange={(e) => setStrike(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Controls */}
+          <div className="space-y-6">
+            <div className="flex gap-4">
+              <div className="flex rounded-lg bg-slate-800 p-1">
+                <button
+                  onClick={() => setPosition('long')}
+                  className={`rounded px-4 py-1 text-sm font-medium transition-colors ${position === 'long' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                >
+                  Long (Buy)
+                </button>
+                <button
+                  onClick={() => setPosition('short')}
+                  className={`rounded px-4 py-1 text-sm font-medium transition-colors ${position === 'short' ? 'bg-rose-500 text-slate-950' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                >
+                  Short (Sell)
+                </button>
+              </div>
 
-        <div>
-          <label className="mb-2 block text-sm text-slate-300">
-            Premium Paid: ${premium}
-          </label>
-          <input
-            type="range"
-            min="0"
-            max="20"
-            value={premium}
-            onChange={(e) => setPremium(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
+              <div className="flex rounded-lg bg-slate-800 p-1">
+                <button
+                  onClick={() => setOptionType('call')}
+                  className={`rounded px-4 py-1 text-sm font-medium transition-colors ${optionType === 'call' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                >
+                  Call
+                </button>
+                <button
+                  onClick={() => setOptionType('put')}
+                  className={`rounded px-4 py-1 text-sm font-medium transition-colors ${optionType === 'put' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                >
+                  Put
+                </button>
+              </div>
+            </div>
 
-        <div>
-          <label className="mb-2 block text-sm text-slate-300">
-            Current Stock Price: ${currentPrice}
-          </label>
-          <input
-            type="range"
-            min="50"
-            max="150"
-            value={currentPrice}
-            onChange={(e) => setCurrentPrice(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
-      </div>
-
-      {/* Simple Payoff Visualization */}
-      <div className="space-y-4">
-        <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
-          <div className="mb-2 flex justify-between text-sm">
-            <span className="text-slate-400">Current Payoff</span>
-            <span className={`font-semibold ${
-              calculatePayoff(currentPrice) >= 0 ? 'text-emerald-400' : 'text-red-400'
-            }`}>
-              ${calculatePayoff(currentPrice).toFixed(2)}
-            </span>
-          </div>
-          <div className="h-32 relative border-t border-l border-slate-700">
-            {/* X-axis */}
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-700" />
-            {/* Y-axis */}
-            <div className="absolute bottom-0 left-0 top-0 w-px bg-slate-700" />
-            {/* Zero line */}
-            <div className="absolute bottom-1/2 left-0 right-0 h-px bg-slate-600 opacity-50" />
-            {/* Payoff line */}
-            <svg className="absolute inset-0 h-full w-full">
-              <polyline
-                points={prices.map((p, i) => `${(i / prices.length) * 100}% ${50 - (payoffs[i] / Math.max(...payoffs.map(Math.abs), 1)) * 40}%`).join(', ')}
-                fill="none"
-                stroke={optionType === 'call' ? '#34d399' : '#f472b6'}
-                strokeWidth="2"
+            <div>
+              <label className="mb-2 flex justify-between text-sm font-medium text-slate-400">
+                Strike Price
+                <span className="text-slate-200">${strikePrice}</span>
+              </label>
+              <input
+                type="range"
+                min="50"
+                max="150"
+                value={strikePrice}
+                onChange={(e) => setStrikePrice(Number(e.target.value))}
+                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700 accent-sky-500"
               />
-            </svg>
-            {/* Current price marker */}
-            <div
-              className="absolute bottom-0 top-0 w-1 bg-white"
-              style={{ left: `${((currentPrice - 50) / 100) * 100}%` }}
-            />
-          </div>
-          <div className="mt-2 flex justify-between text-xs text-slate-500">
-            <span>$50</span>
-            <span>${strike}</span>
-            <span>$150</span>
-          </div>
-        </div>
+            </div>
 
-        <div className="rounded-lg bg-slate-900/50 p-3 text-xs text-slate-400">
-          <p>
-            <strong className="text-slate-300">Formula:</strong> Profit = Max(0, {optionType === 'call' ? 'Stock Price - Strike' : 'Strike - Stock Price'}) - Premium
-          </p>
+            <div>
+              <label className="mb-2 flex justify-between text-sm font-medium text-slate-400">
+                Option Premium
+                <span className="text-slate-200">${premium}</span>
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="20"
+                value={premium}
+                onChange={(e) => setPremium(Number(e.target.value))}
+                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700 accent-sky-500"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 flex justify-between text-sm font-medium text-slate-400">
+                Current Spot Price
+                <span className="text-slate-200">${spotPrice}</span>
+              </label>
+              <input
+                type="range"
+                min="50"
+                max="150"
+                value={spotPrice}
+                onChange={(e) => setSpotPrice(Number(e.target.value))}
+                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700 accent-sky-500"
+              />
+            </div>
+          </div>
+
+          {/* Visualization */}
+          <div className="flex flex-col rounded-xl bg-slate-950/50 p-6">
+            <div className="mb-6 text-center">
+              <p className="text-sm font-medium text-slate-400">P&L at Spot Price</p>
+              <motion.div
+                key={currentProfit}
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                className={`text-4xl font-bold ${currentProfit > 0 ? 'text-emerald-400' :
+                    currentProfit < 0 ? 'text-rose-400' : 'text-slate-200'
+                  }`}
+              >
+                {currentProfit > 0 ? '+' : ''}${currentProfit}
+              </motion.div>
+            </div>
+
+            {/* Payoff Chart */}
+            <div className="relative flex h-40 w-full items-center justify-center border-b border-slate-800">
+              {/* Zero Line */}
+              <div className="absolute left-0 right-0 top-1/2 h-px bg-slate-700" />
+
+              {/* Chart Bars */}
+              <div className="flex h-full w-full items-center justify-between gap-0.5">
+                {payoffData.map((point) => {
+                  const height = Math.min(100, (Math.abs(point.profit) / maxProfit) * 45);
+                  const isProfit = point.profit > 0;
+                  const isSpot = Math.abs(point.price - spotPrice) < 1;
+
+                  return (
+                    <div
+                      key={point.price}
+                      className="group relative flex h-full w-full flex-col justify-center"
+                    >
+                      <div
+                        className={`w-full transition-all ${isSpot ? 'bg-white z-10' :
+                            isProfit ? 'bg-emerald-500/50' : 'bg-rose-500/50'
+                          }`}
+                        style={{
+                          height: `${height}%`,
+                          transform: point.profit >= 0 ? 'translateY(-50%)' : 'translateY(50%)'
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="mt-2 flex justify-between text-xs text-slate-500">
+              <span>${payoffData[0].price}</span>
+              <span>Price</span>
+              <span>${payoffData[payoffData.length - 1].price}</span>
+            </div>
+          </div>
         </div>
       </div>
     </Card>
   );
 }
-

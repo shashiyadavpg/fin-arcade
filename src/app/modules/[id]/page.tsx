@@ -5,13 +5,10 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getModule } from '@/data/modules';
 import { UserProgress } from '@/types/user';
-import { initializeProgress, addXP } from '@/lib/gamification';
+import { initializeProgress } from '@/lib/gamification';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { DCFCalculator } from '@/components/interactive/DCFCalculator';
-import { OptionPayoff } from '@/components/interactive/OptionPayoff';
-import { RatioBuilder } from '@/components/interactive/RatioBuilder';
-import { BondCalculator } from '@/components/interactive/BondCalculator';
+import { motion } from 'framer-motion';
 
 export default function ModulePage() {
   const params = useParams();
@@ -22,11 +19,10 @@ export default function ModulePage() {
 
   useEffect(() => {
     if (!moduleId) return;
-    
+
     const userProgress = initializeProgress();
     setProgress(userProgress);
-    
-    // Load completed lessons from storage
+
     const saved = localStorage.getItem(`module-${moduleId}-lessons`);
     if (saved) {
       setCompletedLessons(JSON.parse(saved));
@@ -46,180 +42,180 @@ export default function ModulePage() {
     );
   }
 
-  const handleLessonComplete = (lessonId: string) => {
-    if (!completedLessons.includes(lessonId)) {
-      const updated = [...completedLessons, lessonId];
-      setCompletedLessons(updated);
-      localStorage.setItem(`module-${moduleId}-lessons`, JSON.stringify(updated));
-      
-      if (progress) {
-        const newProgress = addXP(50, 'lesson', `Completed: ${module.lessons.find(l => l.id === lessonId)?.title}`);
-        setProgress(newProgress);
-      }
-    }
-  };
-
   const progressPercent = (completedLessons.length / module.lessons.length) * 100;
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-6 py-8">
-      <Link href="/modules" className="mb-6 inline-flex items-center text-sm text-slate-400 hover:text-slate-200">
+    <main className="mx-auto min-h-screen max-w-5xl px-6 py-8">
+      <Link href="/modules" className="mb-6 inline-flex items-center text-sm text-slate-400 hover:text-slate-200 transition-colors">
         ← Back to modules
       </Link>
 
-      <div className="mb-8">
-        <div className="mb-4 flex items-center gap-4">
-          <span className="text-5xl">{module.icon}</span>
-          <div>
-            <h1 className="text-3xl font-bold">{module.title}</h1>
-            <p className="mt-1 text-slate-400">{module.description}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-12"
+      >
+        <div className="mb-6 flex items-start justify-between">
+          <div className="flex items-center gap-6">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className={`flex h-24 w-24 items-center justify-center rounded-2xl text-5xl bg-${module.color}-500/10 text-${module.color}-400 border border-${module.color}-500/20 shadow-[0_0_30px_-10px_var(--color-${module.color}-500)]`}
+            >
+              {module.icon}
+            </motion.div>
+            <div>
+              <motion.h1
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-5xl font-bold tracking-tight text-slate-100"
+              >
+                {module.title}
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="mt-4 text-xl text-slate-400 max-w-2xl"
+              >
+                {module.description}
+              </motion.p>
+            </div>
           </div>
         </div>
 
-        <div className="mb-4 flex items-center gap-4 text-sm">
-          <span className={`rounded-full px-3 py-1 capitalize ${
-            module.difficulty === 'beginner' ? 'bg-emerald-500/20 text-emerald-400' :
-            module.difficulty === 'intermediate' ? 'bg-cyan-500/20 text-cyan-400' :
-            'bg-sky-500/20 text-sky-400'
-          }`}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mb-8 flex items-center gap-6 text-sm"
+        >
+          <span className={`rounded-full px-3 py-1 capitalize font-medium border ${module.difficulty === 'beginner' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+            module.difficulty === 'intermediate' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' :
+              'bg-sky-500/10 text-sky-400 border-sky-500/20'
+            }`}>
             {module.difficulty}
           </span>
-          <span className="text-slate-400">{module.estimatedTime} minutes</span>
-          <span className="text-slate-400">{module.lessons.length} lessons</span>
-        </div>
+          <span className="flex items-center gap-2 text-slate-400">
+            🕒 {module.estimatedTime} mins
+          </span>
+          <span className="flex items-center gap-2 text-slate-400">
+            📚 {module.lessons.length} lessons
+          </span>
+        </motion.div>
 
-        <ProgressBar
-          value={progressPercent}
-          label={`${completedLessons.length} of ${module.lessons.length} lessons completed`}
-          color="emerald"
-        />
-      </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Card className="border-slate-800 bg-slate-900/50 p-6 backdrop-blur-sm">
+            <div className="mb-2 flex justify-between text-sm font-medium">
+              <span className="text-slate-300">Module Progress</span>
+              <span className={`text-${module.color}-400`}>{Math.round(progressPercent)}%</span>
+            </div>
+            <ProgressBar
+              value={progressPercent}
+              color={module.color as any}
+            />
+          </Card>
+        </motion.div>
+      </motion.div>
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Lessons</h2>
-        {module.lessons.map((lesson, index) => {
-          const isCompleted = completedLessons.includes(lesson.id);
+      <div className="space-y-12">
+        <section>
+          <h2 className="mb-6 text-2xl font-bold text-slate-100">Learning Path</h2>
+          <div className="space-y-4">
+            {module.lessons.map((lesson, index) => {
+              const isCompleted = completedLessons.includes(lesson.id);
+              const isLocked = index > 0 && !completedLessons.includes(module.lessons[index - 1].id);
 
-          return (
-            <Card key={lesson.id} className={isCompleted ? 'border-emerald-500/30' : ''}>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="mb-2 flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold">
-                      {index + 1}
-                    </span>
-                    <h3 className="text-lg font-semibold">{lesson.title}</h3>
-                    {isCompleted && (
-                      <span className="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-400">
-                        ✓ Complete
-                      </span>
-                    )}
-                    {lesson.interactive && (
-                      <span className="rounded-full bg-cyan-500/20 px-2 py-1 text-xs text-cyan-400">
-                        Interactive
-                      </span>
-                    )}
-                  </div>
-                  <p className="mb-4 text-slate-300">{lesson.content}</p>
+              return (
+                <motion.div
+                  key={lesson.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 + index * 0.1 }}
+                >
+                  <Link
+                    href={isLocked ? '#' : `/modules/${moduleId}/${lesson.id}`}
+                    className={isLocked ? 'cursor-not-allowed' : ''}
+                  >
+                    <motion.div
+                      whileHover={!isLocked ? { scale: 1.02, x: 10, backgroundColor: "rgba(15, 23, 42, 0.8)" } : {}}
+                      className={`group relative flex items-center gap-6 rounded-xl border p-6 transition-all ${isLocked
+                        ? 'border-slate-800 bg-slate-950/30 opacity-50'
+                        : 'border-slate-800 bg-slate-900/40 backdrop-blur-sm hover:border-slate-600 hover:shadow-lg hover:shadow-slate-900/50'
+                        }`}
+                    >
+                      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 font-bold transition-all ${isCompleted
+                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_-5px_var(--color-emerald-500)]'
+                        : isLocked
+                          ? 'border-slate-800 bg-slate-900 text-slate-600'
+                          : `border-${module.color}-500/50 text-${module.color}-400 group-hover:border-${module.color}-400 group-hover:shadow-[0_0_15px_-5px_var(--color-${module.color}-500)]`
+                        }`}>
+                        {isCompleted ? '✓' : index + 1}
+                      </div>
 
-                  {lesson.examples.length > 0 && (
-                    <div className="mb-4 space-y-3">
-                      {lesson.examples.map((example, exIdx) => (
-                        <div key={exIdx} className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-                          <h4 className="mb-1 font-semibold text-emerald-400">{example.title}</h4>
-                          <p className="mb-2 text-sm text-slate-300">{example.description}</p>
-                          {example.calculation && (
-                            <code className="block rounded bg-slate-950 p-2 text-xs text-cyan-300">
-                              {example.calculation}
-                            </code>
-                          )}
-                          {example.result && (
-                            <p className="mt-2 text-sm font-medium text-slate-200">{example.result}</p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-lg font-bold text-slate-200 group-hover:text-white transition-colors">
+                            {lesson.title}
+                          </h3>
+                          {lesson.interactive && (
+                            <span className="rounded-full bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 text-xs font-medium text-cyan-400 shadow-[0_0_10px_-5px_var(--color-cyan-500)]">
+                              Interactive
+                            </span>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <p className="text-sm text-slate-400 mt-1">{lesson.estimatedTime} mins</p>
+                      </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleLessonComplete(lesson.id)}
-                      disabled={isCompleted}
-                      className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                        isCompleted
-                          ? 'bg-emerald-500/20 text-emerald-400 cursor-not-allowed'
-                          : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
-                      }`}
-                    >
-                      {isCompleted ? 'Completed' : 'Mark as Complete'}
-                    </button>
-                    {lesson.interactive && (
-                      <button
-                        onClick={() => {
-                          const interactiveId = `interactive-${lesson.id}`;
-                          const element = document.getElementById(interactiveId);
-                          if (element) {
-                            element.scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
-                        className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-400 hover:bg-cyan-500/20"
-                      >
-                        Try Interactive →
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Interactive Components */}
-      <div className="mt-8 space-y-6">
-        {module.id === 'financial-statements' && (
-          <div id="interactive-ratio-analysis">
-            <h2 className="mb-4 text-xl font-semibold">Interactive: Ratio Builder</h2>
-            <RatioBuilder />
+                      {!isLocked && (
+                        <div className="text-slate-600 transition-all group-hover:text-emerald-400 group-hover:translate-x-2">
+                          →
+                        </div>
+                      )}
+                    </motion.div>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
-        )}
-        {module.id === 'corporate-finance' && (
-          <>
-            <div id="interactive-npv-irr">
-              <h2 className="mb-4 text-xl font-semibold">Interactive: DCF Calculator</h2>
-              <DCFCalculator />
+        </section>
+
+        {module.quizzes.length > 0 && (
+          <section>
+            <h2 className="mb-6 text-2xl font-bold text-slate-100">Assessments</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {module.quizzes.map((quizId, idx) => (
+                <motion.div
+                  key={quizId}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1 + idx * 0.1 }}
+                >
+                  <Link href={`/quiz/${quizId}`}>
+                    <Card hover glow className="group border-slate-800 bg-slate-900/40 p-8 backdrop-blur-sm transition-all hover:border-fuchsia-500/50 hover:bg-slate-900/60">
+                      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-fuchsia-500/10 text-3xl border border-fuchsia-500/20 group-hover:shadow-[0_0_20px_-5px_var(--color-fuchsia-500)] transition-all">
+                        🎯
+                      </div>
+                      <h3 className="mb-2 text-xl font-bold text-slate-200 group-hover:text-fuchsia-400 transition-colors">
+                        {quizId.split('-').slice(1).join(' ').toUpperCase()}
+                      </h3>
+                      <p className="text-sm text-slate-400 group-hover:text-slate-300">
+                        Test your mastery of this module's concepts.
+                      </p>
+                    </Card>
+                  </Link>
+                </motion.div>
+              ))}
             </div>
-          </>
-        )}
-        {module.id === 'markets' && (
-          <>
-            <div id="interactive-derivatives">
-              <h2 className="mb-4 text-xl font-semibold">Interactive: Option Payoff Calculator</h2>
-              <OptionPayoff />
-            </div>
-            <div id="interactive-bonds">
-              <h2 className="mb-4 text-xl font-semibold">Interactive: Bond Calculator</h2>
-              <BondCalculator />
-            </div>
-          </>
+          </section>
         )}
       </div>
-
-      {module.quizzes.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-4 text-xl font-semibold">Quizzes</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {module.quizzes.map((quizId) => (
-              <Link key={quizId} href={`/quiz/${quizId}`}>
-                <Card hover>
-                  <h3 className="mb-2 font-semibold">Quiz: {quizId}</h3>
-                  <p className="text-sm text-slate-400">Test your knowledge</p>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
     </main>
   );
 }
