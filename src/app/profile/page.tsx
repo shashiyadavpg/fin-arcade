@@ -11,18 +11,29 @@ import { modules } from '@/data/modules';
 
 import { motion } from 'framer-motion';
 
+import { AvatarSelector } from '@/components/profile/AvatarSelector';
+
 export default function ProfilePage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [avatar, setAvatar] = useState('👨‍💻');
 
   useEffect(() => {
     const userProgress = initializeProgress();
     setProgress(userProgress);
+    // Load avatar from local storage if we had it
+    const storedAvatar = localStorage.getItem('fin-arcade-avatar');
+    if (storedAvatar) setAvatar(storedAvatar);
   }, []);
+
+  const handleAvatarSelect = (newAvatar: string) => {
+    setAvatar(newAvatar);
+    localStorage.setItem('fin-arcade-avatar', newAvatar);
+  };
 
   if (!progress) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--electric-blue)] border-t-transparent"></div>
       </div>
     );
   }
@@ -34,10 +45,19 @@ export default function ProfilePage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-8 flex flex-col items-center gap-6 md:flex-row md:items-start md:justify-between"
       >
-        <h1 className="mb-2 text-3xl font-bold text-slate-100"><span className="neon-text">Your Profile</span></h1>
-        <p className="text-slate-400">Track your learning journey</p>
+        <div>
+          <h1 className="mb-2 text-3xl font-bold text-slate-100"><span className="neon-text">Your Profile</span></h1>
+          <p className="text-slate-400">Track your learning journey</p>
+        </div>
+
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[var(--electric-blue)] to-[var(--neon-purple)] text-6xl shadow-[0_0_30px_-5px_var(--electric-blue)]">
+            {avatar}
+          </div>
+          <AvatarSelector currentAvatar={avatar} onSelect={handleAvatarSelect} />
+        </div>
       </motion.div>
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">

@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 import { GamificationOverlay } from "@/components/gamification/GamificationOverlay";
+import { SoundProvider } from "@/context/SoundContext";
+import { SoundToggle } from "@/components/ui/SoundToggle";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sora = Sora({
   subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,15 +30,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-50 antialiased`}
-      >
-        <Suspense fallback={<nav className="border-b border-slate-800 bg-slate-900/50 backdrop-blur h-16" />}>
-          <Navigation />
-        </Suspense>
-        {children}
-        <GamificationOverlay />
+    <html lang="en" className={`${inter.variable} ${sora.variable}`}>
+      <body className="min-h-screen bg-[var(--deep-space)] text-white antialiased selection:bg-[var(--electric-blue)] selection:text-black overflow-x-hidden">
+        <SoundProvider>
+          {/* Background Atmosphere */}
+          <div className="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0A0F1F] to-[#050810]" />
+          <div className="fixed inset-0 z-[-1] bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+
+          <Suspense fallback={<nav className="border-b border-white/10 bg-slate-900/50 backdrop-blur h-16" />}>
+            <Navigation />
+          </Suspense>
+
+          <main className="relative z-10">
+            {children}
+          </main>
+
+          <GamificationOverlay />
+          <SoundToggle />
+        </SoundProvider>
       </body>
     </html>
   );
