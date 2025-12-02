@@ -8,13 +8,23 @@ import { UserProgress } from '@/types/user';
 import { initializeProgress, addXP } from '@/lib/gamification';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { motion } from 'framer-motion';
+
+// Interactive Components
+import { EditableStatement } from '@/components/interactive/fsa/EditableStatement';
+import { TrendTimeMachine } from '@/components/interactive/fsa/TrendTimeMachine';
+import { VerticalHeatmap } from '@/components/interactive/fsa/VerticalHeatmap';
+import { HorizontalDelta } from '@/components/interactive/fsa/HorizontalDelta';
+import { DuPontReactor } from '@/components/interactive/fsa/DuPontReactor';
+import { EPSVisualizer } from '@/components/interactive/fsa/EPSVisualizer';
+import { CashFlowPipelines } from '@/components/interactive/fsa/CashFlowPipelines';
+import { INITIAL_FINANCIAL_DATA } from '@/types/financial';
+import { RatioBuilder } from '@/components/interactive/RatioBuilder';
 import { DCFCalculator } from '@/components/interactive/DCFCalculator';
 import { NPVCalculator } from '@/components/interactive/NPVCalculator';
 import { OptionPayoff } from '@/components/interactive/OptionPayoff';
-import { RatioBuilder } from '@/components/interactive/RatioBuilder';
 import { BondCalculator } from '@/components/interactive/BondCalculator';
 import { PortfolioSim } from '@/components/interactive/PortfolioSim';
-import { motion } from 'framer-motion';
 
 export default function LessonPage() {
     const params = useParams();
@@ -66,8 +76,25 @@ export default function LessonPage() {
         if (!lesson.interactive) return null;
 
         switch (lesson.id) {
+            // FSA Module Components
+            case 'financial-statements-intro':
+                return <EditableStatement initialData={INITIAL_FINANCIAL_DATA.incomeStatement} onUpdate={() => { }} />;
+            case 'trend-analysis':
+                return <TrendTimeMachine />;
+            case 'vertical-analysis':
+                return <VerticalHeatmap />;
+            case 'horizontal-analysis':
+                return <HorizontalDelta />;
             case 'ratio-analysis':
                 return <RatioBuilder />;
+            case 'dupont-analysis':
+                return <DuPontReactor />;
+            case 'eps-analysis':
+                return <EPSVisualizer />;
+            case 'cash-flow-analysis':
+                return <CashFlowPipelines />;
+
+            // Existing Components
             case 'capital-budgeting':
                 return <NPVCalculator />;
             case 'dcf-valuation':
