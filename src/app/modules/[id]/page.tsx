@@ -130,7 +130,8 @@ export default function ModulePage() {
           <div className="space-y-4">
             {module.lessons.map((lesson, index) => {
               const isCompleted = completedLessons.includes(lesson.id);
-              const isLocked = index > 0 && !completedLessons.includes(module.lessons[index - 1].id);
+              // const isLocked = index > 0 && !completedLessons.includes(module.lessons[index - 1].id);
+              const isLocked = false; // UNLOCKED FOR TESTING
 
               return (
                 <motion.div
