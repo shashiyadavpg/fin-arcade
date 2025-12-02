@@ -41,16 +41,6 @@ export default function QuizPage() {
     );
   }
 
-  if (!quiz) {
-    return (
-      <main className="mx-auto min-h-screen max-w-4xl px-6 py-8">
-        <div className="text-center">
-          <h1 className="mb-4 text-2xl font-bold">Quiz not found</h1>
-        </div>
-      </main>
-    );
-  }
-
   const question = quiz.questions[currentQuestion];
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100;
 
