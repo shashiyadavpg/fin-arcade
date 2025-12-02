@@ -11,8 +11,8 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 export default function QuizPage() {
   const params = useParams();
   const router = useRouter();
-  const quizId = params.id as string;
-  const quiz = getQuiz(quizId);
+  const quizId = params?.id as string | undefined;
+  const quiz = quizId ? getQuiz(quizId) : undefined;
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
@@ -30,6 +30,16 @@ export default function QuizPage() {
 
     return () => clearInterval(interval);
   }, [quiz]);
+
+  if (!quizId || !quiz) {
+    return (
+      <main className="mx-auto min-h-screen max-w-4xl px-6 py-8">
+        <div className="text-center">
+          <h1 className="mb-4 text-2xl font-bold">Quiz not found</h1>
+        </div>
+      </main>
+    );
+  }
 
   if (!quiz) {
     return (
@@ -49,6 +59,7 @@ export default function QuizPage() {
   };
 
   const handleNext = () => {
+    if (!quiz || !question) return;
     const newAnswers = { ...answers, [question.id]: selectedAnswer };
     setAnswers(newAnswers);
 
@@ -64,6 +75,7 @@ export default function QuizPage() {
   };
 
   const handleSubmit = () => {
+    if (!quiz || !question) return;
     const finalAnswers = { ...answers, [question.id]: selectedAnswer };
     const result = submitQuiz(quiz, finalAnswers);
     setQuizResult(result);

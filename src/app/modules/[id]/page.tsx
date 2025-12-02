@@ -15,12 +15,14 @@ import { BondCalculator } from '@/components/interactive/BondCalculator';
 
 export default function ModulePage() {
   const params = useParams();
-  const moduleId = params.id as string;
-  const module = getModule(moduleId);
+  const moduleId = params?.id as string | undefined;
+  const module = moduleId ? getModule(moduleId) : undefined;
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   useEffect(() => {
+    if (!moduleId) return;
+    
     const userProgress = initializeProgress();
     setProgress(userProgress);
     
@@ -31,7 +33,7 @@ export default function ModulePage() {
     }
   }, [moduleId]);
 
-  if (!module) {
+  if (!moduleId || !module) {
     return (
       <main className="mx-auto min-h-screen max-w-7xl px-6 py-8">
         <div className="text-center">
