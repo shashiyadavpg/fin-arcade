@@ -30,7 +30,7 @@ export interface Example {
 export const modules: Module[] = [
   {
     id: 'financial-statements',
-    title: 'Financial Statement Analysis',
+    title: 'Financial Statement Analysis (Updated)',
     description: 'Master trend, vertical, horizontal, and ratio analysis. Learn DuPont analysis, EPS calculations, and cash flow interpretation.',
     icon: '📊',
     color: 'emerald',
